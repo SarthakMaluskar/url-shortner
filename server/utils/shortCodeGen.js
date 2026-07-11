@@ -12,7 +12,7 @@ function ShortCodeGen(){
         const randDigit = Math.floor(Math.random() * chars.length);
         shortCode += chars.charAt(randDigit);
     }
-    console.log(shortCode);
+    
     return shortCode;
 
 }
