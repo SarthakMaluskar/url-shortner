@@ -2,10 +2,12 @@ const express = require('express');
 const StartDB = require('./configs/db.js');
 const testRoute = require('./routes/testAPI.js');
 const urlRoutes = require('./routes/urlRoutes.js');
+const ErrorHandeler = require('./middlewares/errorMiddleware.js');
 
 const app = express();
 
 app.use(express.json());
+app.use(ErrorHandeler);
 
 app.use('/', testRoute);
 app.use('/', urlRoutes);
