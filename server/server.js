@@ -1,7 +1,12 @@
 const express = require('express');
 const StartDB = require('./configs/db.js');
+
+//routes
 const testRoute = require('./routes/testAPI.js');
 const urlRoutes = require('./routes/urlRoutes.js');
+const analyticsRoutes = require('./routes/analyticsRoutes.js');
+
+//middlewares
 const ErrorHandeler = require('./middlewares/errorMiddleware.js');
 
 const app = express();
@@ -11,6 +16,7 @@ app.use(ErrorHandeler);
 
 app.use('/', testRoute);
 app.use('/', urlRoutes);
+app.use('/', analyticsRoutes);
 
 async function StartServer(){
     try{

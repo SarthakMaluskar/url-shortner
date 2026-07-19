@@ -5,8 +5,6 @@ const router = express.Router();
 
 const urlValidatorSchema = require('../validators/urlValidator');
 
-const CodeGen = require('../utils/shortCodeGen');
-const AddToDB = require('../utils/addToDB');
 
 const {handleCreateShortURL, handleRedirect} = require('../controllers/url.controller');
 
