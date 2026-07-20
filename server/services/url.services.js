@@ -1,5 +1,10 @@
 const urlValidatorSchema = require('../validators/urlValidator');
 
+//Errors
+const BadRequest = require('../errors/BadRequest');
+const InternalServerError = require('../errors/InternalServerError');
+const NotFoundError = require('../errors/NotFoundError');
+
 //models
 const URL = require('../models/URL');
 const Click = require('../models/Click');
@@ -20,11 +25,7 @@ const createShortURL = async (url) => {
     url = value.url;
 
     if (error) {
-        console.log(error.details[0].message);
-        //invalid link
-        const err = new Error("Invalid Link");
-        err.status = 400; //bad request
-        throw err;
+        throw new BadRequest("Invalid Link");
     }
 
     //now i have to first create a short code for that link & then save it in the db
@@ -41,10 +42,7 @@ const createShortURL = async (url) => {
     try {
         await AddToDB(url, shortCode);
     } catch (error) {
-        console.log("error while adding to DB");
-        const err = new Error("Database Error");
-        err.status = 500;
-        throw err;
+        throw new InternalServerError("Error while writing Link in DB");
     }
 
     return shortCode;
@@ -57,16 +55,11 @@ const getOriginalURL = async (shortCode) => {
     try {
         urlDoc = await URL.findOne({ shortCode });
     } catch (error) {
-        console.log(error);
-        const err = new Error("Internal Server Error");
-        err.status = 500;
-        throw err;
+        throw new InternalServerError("DB error while fetching URL doc");
     }
 
     if (!urlDoc) {
-        const err = new Error("URL does not exist");
-        err.status = 404;
-        throw err;
+        throw new NotFoundError("URL with this ShortCode does not exist");
     }
 
 

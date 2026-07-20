@@ -4,12 +4,12 @@
 
 const { nanoid, customAlphabet } = require('nanoid');
 
+const generateMyID = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 6);
 
 function ShortCodeGen(){
 
-    const generateMyID = customAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 6);
     const shortCode = generateMyID();
-    console.log(shortCode);
+    
     return shortCode;
 
 }
