@@ -38,6 +38,8 @@ const handleRedirect = async(req,res,next) =>{
     
 
     const shortCode = req.params.code;
+
+    //controller should not care weather original URL came from redis or db so redis should also be implemented in the service layer
     let originalURL;
     try{
         originalURL = await getOriginalURL(shortCode);
@@ -48,6 +50,8 @@ const handleRedirect = async(req,res,next) =>{
     //13-07-26
     //lets first add the count event before the redirect happens for now
 
+
+    //addClickEvent is in controller and not in getOriginalURL coz that is specifically for getting the urldoc, dont mix the concerns
     try{
         await addClickEvent(originalURL._id);
     }catch(error){

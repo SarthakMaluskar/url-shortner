@@ -1,5 +1,8 @@
 const express = require('express');
+
+//configs
 const StartDB = require('./configs/db.js');
+const redisClient = require('./configs/redis.js');
 
 //routes
 const testRoute = require('./routes/testAPI.js');
@@ -21,6 +24,9 @@ app.use('/', analyticsRoutes);
 async function StartServer(){
     try{
         await StartDB();
+        await redisClient.connect();
+        console.log("Redis connected!")
+
         app.listen(3000, ()=>{
             console.log("Server running on port 3000!");
         })

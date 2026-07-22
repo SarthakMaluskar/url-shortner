@@ -1,5 +1,8 @@
 const urlValidatorSchema = require('../validators/urlValidator');
 
+//configs
+const redisClient = require('../configs/redis');
+
 //Errors
 const BadRequest = require('../errors/BadRequest');
 const InternalServerError = require('../errors/InternalServerError');
@@ -50,8 +53,23 @@ const createShortURL = async (url) => {
 
 const getOriginalURL = async (shortCode) => {
 
-    let urlDoc;
+    //we have the shortCode here first lets check if we have it cached in redis
+    try {
+        const urlDocRedis = await redisClient.get(shortCode);
 
+        if (urlDocRedis) {
+
+            console.log('redis cache hit', shortCode);
+            return JSON.parse(urlDocRedis);
+        }
+
+    } catch (err) {
+        console.log("Redis Unavailable :", err.message);
+    }
+
+
+    
+    let urlDoc;
     try {
         urlDoc = await URL.findOne({ shortCode });
     } catch (error) {
@@ -62,10 +80,28 @@ const getOriginalURL = async (shortCode) => {
         throw new NotFoundError("URL with this ShortCode does not exist");
     }
 
+    try{
+        await redisClient.set(shortCode, JSON.stringify({
+        _id: urlDoc._id,
+        originalURL: urlDoc.originalURL
+    }),
+        {
+            EX: 3600, // expires in 1 hour
+        })
+    }catch(err){
+        console.log("Redis populate failed");
+    }
+    
+
 
     console.log(urlDoc.shortCode, ": redirecting to :", urlDoc.originalURL);
 
-    return urlDoc;
+
+
+    return {
+        _id: urlDoc._id,
+        originalURL: urlDoc.originalURL
+    };
 }
 
 
