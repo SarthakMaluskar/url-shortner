@@ -10,7 +10,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bullmq": "^5.81.2",
     "express": "^5.2.1",
+    "ioredis": "^5.11.1",
     "joi": "^18.2.3",
     "mongoose": "^9.7.4",
     "nanoid": "^6.0.0",

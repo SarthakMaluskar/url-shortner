@@ -5,6 +5,8 @@ const URL = require('../models/URL');
 const InternalServerError = require('../errors/InternalServerError');
 const NotFoundError = require('../errors/NotFoundError');
 
+const analyticsQueue = require('../queues/analytics.queue');
+
 const addClickEvent = async (urlID) => {
 
 
@@ -57,7 +59,19 @@ const getAnalytics = async (shortCode) => {
 }
 
 
+const enqueueClickEvent = async(data) =>{
+    await analyticsQueue.add('record-click', data, {
+        attempts : 3,
+        backoff : {
+            type : 'exponential',
+            delay : 1000
+        }
+    });
+}
+
+
 module.exports = {
     addClickEvent,
-    getAnalytics
+    getAnalytics,
+    enqueueClickEvent
 }

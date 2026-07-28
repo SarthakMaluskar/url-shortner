@@ -1,14 +1,17 @@
+const { Queue } = require('bullmq');
 
+const connection = require('../configs/bullmq');
 
 
 //services imports
-const {createShortURL,getOriginalURL} = require('../services/url.services');
-const {addClickEvent} = require('../services/analytics.services');
+const { createShortURL, getOriginalURL } = require('../services/url.services');
+const { addClickEvent } = require('../services/analytics.services');
+const {enqueueClickEvent} = require('../services/analytics.services');
 
 
 //controllers
 
-const handleCreateShortURL = async (req,res,next) =>{
+const handleCreateShortURL = async (req, res, next) => {
     console.log("user sent a link");
 
     console.log("Url Sent is :", req.body.url);
@@ -19,31 +22,31 @@ const handleCreateShortURL = async (req,res,next) =>{
     //thinking of using joi for input validation
 
     let shortCode;
-    try{
+    try {
         shortCode = await createShortURL(url);
-    }catch(error){
-       return next(error);
+    } catch (error) {
+        return next(error);
     }
-   
-    
+
+
 
     res.send(`http://localhost:3000/${shortCode}`);
 }
 
-const handleRedirect = async(req,res,next) =>{
+const handleRedirect = async (req, res, next) => {
     //first check if code exists in db, if not throw an error invalid url
     //if code is present make a db lookup to get the original URL and then redirect
 
-    
-    
+
+
 
     const shortCode = req.params.code;
 
     //controller should not care weather original URL came from redis or db so redis should also be implemented in the service layer
     let originalURL;
-    try{
+    try {
         originalURL = await getOriginalURL(shortCode);
-    }catch(error){
+    } catch (error) {
         return next(error);
     }
 
@@ -52,13 +55,24 @@ const handleRedirect = async(req,res,next) =>{
 
 
     //addClickEvent is in controller and not in getOriginalURL coz that is specifically for getting the urldoc, dont mix the concerns
-    try{
-        await addClickEvent(originalURL._id);
-    }catch(error){
-        return next(error);
-    }
+    //now i have to remove addClickEvent from the controller and it to the worker, cause we will insert in just insert in queue here.
 
+    //only doubt is should i include this logic in utils? like a function AddToQueue it is better right?
     
+    await enqueueClickEvent({
+        urlId : originalURL._id
+    });
+
+
+    //lets just commnet it out for now, this addClickEvent should be added in the worker file.
+
+    // try {
+    //     await addClickEvent(originalURL._id);
+    // } catch (error) {
+    //     return next(error);
+    // }
+
+
 
     //no need for status code here, express automatically sends 302 for redirect
     return res.redirect(originalURL.originalURL);
