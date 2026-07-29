@@ -16,7 +16,7 @@ const myWorker = new Worker('analytics',
         console.log("worker started addClickEvent");
         //here call the function addClickEvent
         // console.log(job.data.urlId);
-        await addClickEvent(job.data.urlId);
+        await addClickEvent(job.data);
         console.log("Added Click");
     },
     {

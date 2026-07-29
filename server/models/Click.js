@@ -14,6 +14,18 @@ const ClickSchema = Schema({
     clickedAt : {
         type : Date,
         default : Date.now
+    },
+    ip : {
+        type : String,
+        required : true
+    },
+    userAgent : {
+        type : String,
+        required : true
+    },
+    referer : {
+        type : String,
+        default : null
     }
 })
 

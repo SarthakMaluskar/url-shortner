@@ -60,9 +60,14 @@ const handleRedirect = async (req, res, next) => {
     //only doubt is should i include this logic in utils? like a function AddToQueue it is better right?
     
     await enqueueClickEvent({
-        urlId : originalURL._id
+        urlId : originalURL._id,
+        referer : req.get("Referer"),
+        userAgent : req.get("User-Agent"),
+        ip : req.ip
     });
 
+    console.log(req.ip);
+    console.log(req.headers);
 
     //lets just commnet it out for now, this addClickEvent should be added in the worker file.
 
