@@ -30,7 +30,7 @@ const handleCreateShortURL = async (req, res, next) => {
 
 
 
-    res.send(`http://localhost:3000/${shortCode}`);
+    res.status(200).json({message : `http://localhost:3000/${shortCode}`});
 }
 
 const handleRedirect = async (req, res, next) => {
@@ -66,8 +66,6 @@ const handleRedirect = async (req, res, next) => {
         ip : req.ip
     });
 
-    console.log(req.ip);
-    console.log(req.headers);
 
     //lets just commnet it out for now, this addClickEvent should be added in the worker file.
 

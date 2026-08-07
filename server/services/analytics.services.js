@@ -13,15 +13,18 @@ const addClickEvent = async (analyticsDoc) => {
     // referer : req.get("Referer"),
     // userAgent : req.get("User-Agent")
 
+    console.log("reached addClickEvent");
+
     try {
         const click = new Click({
             url: analyticsDoc.urlId,
-            userAgent : analyticsDoc.userAgent,
-            referer : analyticsDoc.referer,
-            ip : analyticsDoc.ip
+            userAgent: analyticsDoc.userAgent,
+            referer: analyticsDoc.referer,
+            ip: analyticsDoc.ip
         })
-
+        
         await click.save();
+        
 
     } catch (error) {
         throw new InternalServerError("failed while adding cilck doc");
@@ -52,7 +55,65 @@ const getAnalytics = async (shortCode) => {
     //this gets the last clicked
     const latestClickDoc = await Click.findOne({ url: docId }).sort({ _id: -1 });
 
-    const uniqueVisitors = await Click.distinct('ip', {url : docId});
+    const uniqueVisitors = await Click.distinct('ip', { url: docId });
+
+    const fiveDaysAgo = new Date();
+    fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 4);
+    fiveDaysAgo.setHours(0, 0, 0, 0);
+
+    const clicksPerDay = await Click.aggregate([
+        {
+            $match: { url: docId,
+                clickedAt : {
+                    $gte : fiveDaysAgo
+                }
+             }
+        },
+        {
+            $group: {
+                _id: {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$clickedAt"
+                    }
+                },
+                totalClicks: {
+                    $sum: 1
+                }
+            }
+        },
+        {
+            $sort: {
+                _id: -1
+            }
+        }
+    ]);
+
+    //lets write top 5 referrers 
+
+    const topReferrers = await Click.aggregate([
+        {
+            $match : {
+                url : docId,
+                referer : {
+                    $ne : null
+                }
+                
+            }
+        },
+        {
+            $group : {
+                _id : "$referer",
+                count : {$sum : 1}
+            }
+        },
+        {
+            $sort : { count : -1}
+        },
+        {
+            $limit : 5
+        }
+    ])
 
 
     return {
@@ -62,7 +123,9 @@ const getAnalytics = async (shortCode) => {
         "lastClickedAt": latestClickDoc.clickedAt ?? null,
         "clicksLast24Hours": last24hours,
         "createdAt": urlDoc.createdAt,
-        "uniqueVisitors" : uniqueVisitors.length
+        "uniqueVisitors": uniqueVisitors.length,
+        "clicksPerDay" : clicksPerDay,
+        "topReferrers" : topReferrers
     };
 }
 
