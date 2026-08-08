@@ -1,4 +1,7 @@
 const express = require('express');
+const cookieParser = require('cookie-parser');
+
+
 
 //configs
 const StartDB = require('./configs/db.js');
@@ -16,7 +19,7 @@ const ErrorHandeler = require('./middlewares/errorMiddleware.js');
 const app = express();
 
 app.use(express.json());
-
+app.use(cookieParser());
 
 app.use('/', testRoute);
 app.use('/', urlRoutes);

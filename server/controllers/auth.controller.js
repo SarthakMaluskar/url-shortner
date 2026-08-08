@@ -21,14 +21,22 @@ const handleLogin = async(req,res,next) => {
     const username = req.body.username;
     const password = req.body.password;
 
+    
     try{
-        await loginUser(username, password);
+        const result = await loginUser(username, password);
+
+        res.cookie('token', result.token, {
+        httpOnly : true,
+        maxAge: 60 * 60 * 1000,
+        sameSite: 'strict'
+    })
+
+    res.status(200).json({success : true, username : result.username, userId : result.userId});
+
     }catch(err){
         return next(err);
     }
     
-
-    res.send(`Login done! ${username}`);
 }
 
 
