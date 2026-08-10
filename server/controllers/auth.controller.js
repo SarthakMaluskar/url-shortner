@@ -40,7 +40,24 @@ const handleLogin = async(req,res,next) => {
 }
 
 
+const handleLogout = async(req,res,next) =>{
+    console.log("logout route");
+
+    res.clearCookie('token', {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: false // set true in production with HTTPS
+    });
+
+    return res.status(200).json({
+        success: true,
+        message: 'Logged out successfully'
+    });
+}
+
+
 module.exports = {
     handleSignup,
-    handleLogin
+    handleLogin,
+    handleLogout
 };

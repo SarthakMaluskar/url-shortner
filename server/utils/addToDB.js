@@ -1,11 +1,12 @@
 const URL = require('../models/URL');
 
-async function AddToDB(url, shortCode){
+async function AddToDB(url, shortCode,owner){
     //url is already validated also shortcode is unique so i can directly insert here
 
     const newURL = new URL({
         originalURL : url,
-        shortCode
+        shortCode,
+        owner
     })
 
     await newURL.save();

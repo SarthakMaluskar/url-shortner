@@ -4,6 +4,7 @@ const URL = require('../models/URL');
 //errors
 const InternalServerError = require('../errors/InternalServerError');
 const NotFoundError = require('../errors/NotFoundError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const analyticsQueue = require('../queues/analytics.queue');
 
@@ -33,14 +34,21 @@ const addClickEvent = async (analyticsDoc) => {
 }
 
 
-const getAnalytics = async (shortCode) => {
+const getAnalytics = async (shortCode,userId) => {
 
 
     //got the original URL document
     const urlDoc = await URL.findOne({ shortCode });
 
+    //have to check if the owner ID in url document matches with the one who is authenticated
+    //if not he is trying to access others analytics
+
     if (!urlDoc) {
         throw new NotFoundError("shortCode not found");
+    }
+
+    if(urlDoc.owner.toString() !== userId){
+        throw new UnauthorizedError("You are not allowed to access this analytics");
     }
 
 
@@ -120,7 +128,7 @@ const getAnalytics = async (shortCode) => {
         "shortCode": urlDoc.shortCode,
         "originalURL": urlDoc.originalURL,
         "totalClicks": totalClicks,
-        "lastClickedAt": latestClickDoc.clickedAt ?? null,
+        lastClickedAt: latestClickDoc?.clickedAt ?? null,
         "clicksLast24Hours": last24hours,
         "createdAt": urlDoc.createdAt,
         "uniqueVisitors": uniqueVisitors.length,

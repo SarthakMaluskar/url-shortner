@@ -1,7 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 
-
+require('dotenv').config(); 
 
 //configs
 const StartDB = require('./configs/db.js');

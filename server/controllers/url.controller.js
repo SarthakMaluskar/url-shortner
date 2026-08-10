@@ -17,13 +17,14 @@ const handleCreateShortURL = async (req, res, next) => {
     console.log("Url Sent is :", req.body.url);
 
     const url = req.body.url;
+    const owner = req.body.owner;
 
     //before that i have to add basic validation.
     //thinking of using joi for input validation
 
     let shortCode;
     try {
-        shortCode = await createShortURL(url);
+        shortCode = await createShortURL(url,owner);
     } catch (error) {
         return next(error);
     }

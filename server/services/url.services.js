@@ -19,7 +19,7 @@ const AddToDB = require('../utils/addToDB');
 
 
 //service functions
-const createShortURL = async (url) => {
+const createShortURL = async (url,owner) => {
     const { error, value } = urlValidatorSchema.validate({
         url
     })
@@ -43,7 +43,7 @@ const createShortURL = async (url) => {
 
     //now i have the shortCode now i have to insert it into the DB
     try {
-        await AddToDB(url, shortCode);
+        await AddToDB(url, shortCode,owner);
     } catch (error) {
         throw new InternalServerError("Error while writing Link in DB");
     }
