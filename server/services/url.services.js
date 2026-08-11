@@ -19,7 +19,7 @@ const AddToDB = require('../utils/addToDB');
 
 
 //service functions
-const createShortURL = async (url,owner) => {
+const createShortURL = async (url, owner) => {
     const { error, value } = urlValidatorSchema.validate({
         url
     })
@@ -43,7 +43,7 @@ const createShortURL = async (url,owner) => {
 
     //now i have the shortCode now i have to insert it into the DB
     try {
-        await AddToDB(url, shortCode,owner);
+        await AddToDB(url, shortCode, owner);
     } catch (error) {
         throw new InternalServerError("Error while writing Link in DB");
     }
@@ -68,7 +68,7 @@ const getOriginalURL = async (shortCode) => {
     }
 
 
-    
+
     let urlDoc;
     try {
         urlDoc = await URL.findOne({ shortCode });
@@ -80,18 +80,18 @@ const getOriginalURL = async (shortCode) => {
         throw new NotFoundError("URL with this ShortCode does not exist");
     }
 
-    try{
+    try {
         await redisClient.set(shortCode, JSON.stringify({
-        _id: urlDoc._id,
-        originalURL: urlDoc.originalURL
-    }),
-        {
-            EX: 3600, // expires in 1 hour
-        })
-    }catch(err){
+            _id: urlDoc._id,
+            originalURL: urlDoc.originalURL
+        }),
+            {
+                EX: 3600, // expires in 1 hour
+            })
+    } catch (err) {
         console.log("Redis populate failed");
     }
-    
+
 
 
     console.log(urlDoc.shortCode, ": redirecting to :", urlDoc.originalURL);
@@ -104,8 +104,13 @@ const getOriginalURL = async (shortCode) => {
     };
 }
 
+const getMyUrls = async (userId) => {
+    const urlDocs = await URL.find({ owner: userId });
 
-
+    //we are not throwing error here if the data is not found because it is not really an error
+    //we just send an empty array to frontend it is more friendly
+    return urlDocs;
+}
 
 
 
@@ -114,4 +119,5 @@ const getOriginalURL = async (shortCode) => {
 module.exports = {
     createShortURL,
     getOriginalURL,
+    getMyUrls
 }

@@ -4,7 +4,7 @@ const connection = require('../configs/bullmq');
 
 
 //services imports
-const { createShortURL, getOriginalURL } = require('../services/url.services');
+const { createShortURL, getOriginalURL, getMyUrls } = require('../services/url.services');
 const { addClickEvent } = require('../services/analytics.services');
 const {enqueueClickEvent} = require('../services/analytics.services');
 
@@ -82,7 +82,22 @@ const handleRedirect = async (req, res, next) => {
     return res.redirect(originalURL.originalURL);
 }
 
+const handleGetMyUrls = async (req, res, next) => {
+  const userId = req.user.userId;
+
+  
+
+  try {
+    const allUrls = await getMyUrls(userId);
+
+    res.status(200).json({ data: allUrls });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
     handleCreateShortURL,
-    handleRedirect
+    handleRedirect,
+    handleGetMyUrls
 };
