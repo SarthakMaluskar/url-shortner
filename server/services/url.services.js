@@ -7,6 +7,7 @@ const redisClient = require('../configs/redis');
 const BadRequest = require('../errors/BadRequest');
 const InternalServerError = require('../errors/InternalServerError');
 const NotFoundError = require('../errors/NotFoundError');
+const ConflictError = require('../errors/ConflictError');
 
 //models
 const URL = require('../models/URL');
@@ -19,7 +20,7 @@ const AddToDB = require('../utils/addToDB');
 
 
 //service functions
-const createShortURL = async (url, owner) => {
+const createShortURL = async (url, owner, customAlias) => {
     const { error, value } = urlValidatorSchema.validate({
         url
     })
@@ -36,6 +37,23 @@ const createShortURL = async (url, owner) => {
 
     //here have to make a db lookup if code is already present if yes call codegen again (while loop)
     let shortCode;
+
+    if (customAlias) {
+        const doesExist = await URL.exists({ shortCode: customAlias });
+
+        if (doesExist) {
+            throw new ConflictError("This alias is not available");
+        }
+
+        try {
+            await AddToDB(url, customAlias, owner);
+        } catch (error) {
+            throw new InternalServerError("Error while writing Link in DB");
+        }
+
+        return customAlias;
+
+    }
 
     do {
         shortCode = CodeGen();
@@ -112,12 +130,25 @@ const getMyUrls = async (userId) => {
     return urlDocs;
 }
 
+const deleteURL = async (shortCode, userId) => {
+    const result = await URL.findOneAndDelete({
+        shortCode: shortCode,
+        owner: userId
+    });
 
+    if (!result) {
+        throw new NotFoundError('URL not found or not owned by user');
+    }
+
+    await redisClient.del(shortCode);
+    
+}
 
 
 
 module.exports = {
     createShortURL,
     getOriginalURL,
-    getMyUrls
+    getMyUrls,
+    deleteURL
 }

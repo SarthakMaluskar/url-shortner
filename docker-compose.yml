@@ -1,0 +1,41 @@
+services:
+
+  api:
+    build: ./server
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/url-shortner
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+
+  worker:
+    build: ./server
+    command: npm run worker
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/url-shortner
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+
+  mongo:
+    image: mongo:8
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:8-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  mongo_data:
+  redis_data:

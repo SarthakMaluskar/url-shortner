@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 async function StartDB(){
-    await mongoose.connect('mongodb://127.0.0.1:27017/url-shortner');
+    await mongoose.connect(process.env.MONGO_URI);
 }
  
 

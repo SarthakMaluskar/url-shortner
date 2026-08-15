@@ -1,15 +1,12 @@
 
-const IORedis = require('ioredis');
+const IORedis = require("ioredis");
 
-const connection = new IORedis({
+const connection = new IORedis(process.env.REDIS_URL, {
     maxRetriesPerRequest: null,
 });
 
-//lets export connection from here so we can use it.
+// lets export connection from here so we can use it.
 module.exports = connection;
-
-
-
 // const myQueue = new Queue('myqueue', {
 //     connection
 // })
