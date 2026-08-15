@@ -1,5 +1,5 @@
 const {Worker} = require('bullmq');
-
+require('dotenv').config(); 
 
 //mongoDB connection cause this is a whole new compleetely different process, and for addClickEvent we need the db.
 const StartDB = require('../configs/db');
