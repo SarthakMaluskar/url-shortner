@@ -32,9 +32,12 @@ app.use(ErrorHandeler);
 async function StartServer(){
     try{
         await StartDB();
+        
         await redisClient.connect();
         console.log("Redis connected!")
 
+        require("./workers/analytics.worker");
+        
         app.listen(3000, ()=>{
             console.log("Server running on port 3000!");
         })
@@ -43,6 +46,8 @@ async function StartServer(){
         console.log(err.message);
     }
 }
+
+
 
 StartServer();
 

@@ -2,9 +2,9 @@ const {Worker} = require('bullmq');
 require('dotenv').config(); 
 
 //mongoDB connection cause this is a whole new compleetely different process, and for addClickEvent we need the db.
-const StartDB = require('../configs/db');
-StartDB();
-
+// const StartDB = require('../configs/db');
+// StartDB();
+//removing db connection from this cause this will work now as the same process as main api
 const connection = require('../configs/bullmq');
 
 const {addClickEvent} = require('../services/analytics.services');
