@@ -36,7 +36,7 @@ async function StartServer(){
         await redisClient.connect();
         console.log("Redis connected!")
 
-        // require("./workers/analytics.worker");
+        require("./workers/analytics.worker");
 
         app.listen(3000, ()=>{
             console.log("Server running on port 3000!");
