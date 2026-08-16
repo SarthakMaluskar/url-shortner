@@ -1,5 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 require('dotenv').config(); 
 
@@ -18,6 +19,14 @@ const ErrorHandeler = require('./middlewares/errorMiddleware.js');
 
 const app = express();
 
+app.use(cors({
+    origin: [
+        'http://localhost:5173',
+        'https://YOUR-VERCEL-APP.vercel.app'
+    ],
+    credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -25,6 +34,9 @@ app.use('/', testRoute);
 app.use('/', urlRoutes);
 app.use('/', analyticsRoutes);
 app.use('/', authRoutes);
+
+
+
 
 
 
