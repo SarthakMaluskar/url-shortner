@@ -91,6 +91,7 @@ const getOriginalURL = async (shortCode) => {
     try {
         urlDoc = await URL.findOne({ shortCode });
     } catch (error) {
+        console.log("Actual db error", error);
         throw new InternalServerError("DB error while fetching URL doc");
     }
 
