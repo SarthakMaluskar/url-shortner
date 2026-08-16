@@ -1,13 +1,26 @@
 const { createUser, loginUser } = require('../services/auth.services');
 
-const isProduction = process.env.NODE_ENV === 'production';
+/**
+ * Returns environment and protocol-aware cookie options
+ * @param {import('express').Request} req 
+ */
+const getCookieOptions = (req) => {
+    // Detect whether connection/environment is HTTPS or Production
+    const isHttps = 
+        req.secure || 
+        req.headers['x-forwarded-proto'] === 'https' ||
+        process.env.NODE_ENV === 'production' ||
+        process.env.RENDER === 'true' ||
+        (req.headers.origin && req.headers.origin.startsWith('https://'));
 
-const getCookieOptions = () => ({
-    httpOnly: true,
-    maxAge: 60 * 60 * 1000,
-    sameSite: isProduction ? 'none' : 'lax',
-    secure: isProduction ? true : false,
-});
+    return {
+        httpOnly: true,
+        maxAge: 60 * 60 * 1000, // 1 hour
+        sameSite: isHttps ? 'none' : 'lax',
+        secure: isHttps,
+        path: '/',
+    };
+};
 
 const handleSignup = async (req, res, next) => {
     const username = req.body.username;
@@ -23,7 +36,7 @@ const handleSignup = async (req, res, next) => {
 };
 
 const handleLogin = async (req, res, next) => {
-    console.log("login route");
+    console.log("login route called from origin:", req.headers.origin);
 
     const username = req.body.username;
     const password = req.body.password;
@@ -31,7 +44,10 @@ const handleLogin = async (req, res, next) => {
     try {
         const result = await loginUser(username, password);
 
-        res.cookie('token', result.token, getCookieOptions());
+        const cookieOptions = getCookieOptions(req);
+        console.log("Setting token cookie with options:", cookieOptions);
+
+        res.cookie('token', result.token, cookieOptions);
 
         res.status(200).json({
             success: true,
@@ -46,13 +62,14 @@ const handleLogin = async (req, res, next) => {
 const handleLogout = async (req, res, next) => {
     console.log("logout route");
 
-    const clearOptions = {
-        httpOnly: true,
-        sameSite: isProduction ? 'none' : 'lax',
-        secure: isProduction ? true : false,
-    };
+    const cookieOptions = getCookieOptions(req);
 
-    res.clearCookie('token', clearOptions);
+    res.clearCookie('token', {
+        httpOnly: true,
+        sameSite: cookieOptions.sameSite,
+        secure: cookieOptions.secure,
+        path: '/',
+    });
 
     return res.status(200).json({
         success: true,

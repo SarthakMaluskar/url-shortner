@@ -19,7 +19,7 @@ const ErrorHandeler = require('./middlewares/errorMiddleware.js');
 
 const app = express();
 
-// Trust proxy for secure cookies over reverse proxies (Render / Vercel / Nginx)
+// Trust reverse proxy (Render, Vercel, Cloudflare, Nginx) so req.secure and req.protocol work accurately
 app.set('trust proxy', 1);
 
 const allowedOrigins = [
@@ -29,15 +29,11 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps, curl, server-to-server)
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(null, true); // Allow all configured SPA origins
-        }
-    },
+    origin: allowedOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie']
 }));
 
 app.use(express.json());
