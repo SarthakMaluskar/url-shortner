@@ -33,7 +33,9 @@ export default function DashboardPage() {
     } catch (err) {
       const msg = err.userMessage || err.message || 'Failed to load links';
       setError(msg);
-      toast.error(msg);
+      if (err.response?.status !== 401) {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
