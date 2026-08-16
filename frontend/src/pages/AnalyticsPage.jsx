@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
 import { getUrlAnalytics } from '../api/analytics';
-import { copyToClipboard, formatDate, formatRelativeTime } from '../utils/formatters';
+import { copyToClipboard, formatDate, formatRelativeTime, buildShortUrl } from '../utils/formatters';
 import AnalyticsCharts from '../components/AnalyticsCharts';
 import StatCard from '../components/StatCard';
 
@@ -45,8 +45,7 @@ export default function AnalyticsPage() {
     fetchAnalytics(true);
   };
 
-  const backendBase = import.meta.env.VITE_SHORT_URL_BASE || 'http://localhost:3000';
-  const fullShortUrl = `${backendBase.replace(/\/$/, '')}/${shortCode}`;
+  const fullShortUrl = buildShortUrl(shortCode);
 
   const handleCopy = async () => {
     const success = await copyToClipboard(fullShortUrl);

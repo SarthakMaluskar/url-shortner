@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../context/ToastContext';
-import { copyToClipboard, formatDate, formatRelativeTime, truncateUrl } from '../utils/formatters';
+import { copyToClipboard, formatDate, formatRelativeTime, truncateUrl, buildShortUrl } from '../utils/formatters';
 
 export default function UrlItem({ url, onDeleteClick }) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
-  const backendBase = import.meta.env.VITE_SHORT_URL_BASE || 'http://localhost:3000';
-  const fullShortUrl = `${backendBase.replace(/\/$/, '')}/${url.shortCode}`;
+  const fullShortUrl = buildShortUrl(url.shortCode);
 
   const handleCopy = async () => {
     const success = await copyToClipboard(fullShortUrl);

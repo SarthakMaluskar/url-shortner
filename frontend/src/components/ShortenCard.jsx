@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { shortenUrl } from '../api/urls';
-import { copyToClipboard } from '../utils/formatters';
+import { copyToClipboard, buildShortUrl } from '../utils/formatters';
 import { validateUrl, validateCustomAlias } from '../utils/validators';
 
 export default function ShortenCard({ onCreated, autoFocus = false, compact = false }) {
@@ -51,8 +51,14 @@ export default function ShortenCard({ onCreated, autoFocus = false, compact = fa
     try {
       const response = await shortenUrl(validatedUrl, customAlias.trim() || null);
       
-      const shortUrl = response.message;
-      const shortCode = shortUrl.split('/').pop();
+      // Extract shortCode regardless of whether the backend returns full localhost URL or relative code
+      const rawMessage = response.message || '';
+      const shortCode = rawMessage.includes('/')
+        ? rawMessage.split('/').filter(Boolean).pop()
+        : rawMessage;
+
+      // Construct canonical short URL using VITE_SHORT_URL_BASE
+      const shortUrl = buildShortUrl(shortCode);
 
       const createdObj = {
         shortUrl,

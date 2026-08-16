@@ -64,15 +64,34 @@ export function extractHostname(url) {
 }
 
 /**
- * Formats a raw short code into a full URL using base URL
+ * Returns the configured base URL for short link redirects
  */
-export function formatShortUrl(shortCodeOrUrl, baseUrl = 'http://localhost:3000') {
-  if (!shortCodeOrUrl) return '';
-  if (shortCodeOrUrl.startsWith('http://') || shortCodeOrUrl.startsWith('https://')) {
-    return shortCodeOrUrl;
+export function getShortUrlBase() {
+  const envBase = (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SHORT_URL_BASE)
+    || (typeof process !== 'undefined' && process.env?.VITE_SHORT_URL_BASE);
+
+  if (envBase && String(envBase).trim()) {
+    return String(envBase).trim().replace(/\/$/, '');
   }
-  const cleanBase = (baseUrl || 'http://localhost:3000').replace(/\/$/, '');
-  return `${cleanBase}/${shortCodeOrUrl}`;
+  return 'http://localhost:3000';
+}
+
+/**
+ * Formats a raw short code or backend localhost URL into the canonical short URL using VITE_SHORT_URL_BASE
+ * Example: "http://localhost:3000/abc123" -> "https://url-shortner-iqwk.onrender.com/abc123"
+ */
+export function buildShortUrl(shortCodeOrUrl) {
+  if (!shortCodeOrUrl) return '';
+  const base = getShortUrlBase();
+  const code = String(shortCodeOrUrl).split('/').filter(Boolean).pop();
+  return `${base}/${code}`;
+}
+
+/**
+ * Formats a raw short code into a full URL using base URL (alias for buildShortUrl)
+ */
+export function formatShortUrl(shortCodeOrUrl) {
+  return buildShortUrl(shortCodeOrUrl);
 }
 
 /**
